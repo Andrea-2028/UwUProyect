@@ -16,6 +16,8 @@ class Platform extends Model
         'name',
     ];
 
+    protected $hidden = ['created_at', 'updated_at','pivot'];
+
     /**
      * Relación: una plataforma puede tener muchos juegos (N:N).
      */

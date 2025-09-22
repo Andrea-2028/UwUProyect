@@ -25,6 +25,8 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
+                'emailCreator' => 'required|string|email|max:100',
+                'passwordCreator'   => 'required|string|min:8',
                 'first_name' => 'required|string|max:100',
                 'last_name'  => 'required|string|max:100',
                 'phone'      => 'nullable|digits:10',
@@ -55,23 +57,15 @@ class UserController extends Controller
                 ], 400);
             }
 
-            // Validamos al creador
-            $creatorUser = JWTAuth::parseToken()->authenticate();
-            if (!$creatorUser) {
+            // Buscar al creador por su email
+            $creatorUser = User::where('email', $request->emailCreator)->first();
+
+            if (!$creatorUser || !\Hash::check($request->passwordCreator, $creatorUser->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Usuario no encontrado en el token',
+                    'message' => 'Credenciales del creador inválidas.',
                     'timestamp' => now(),
                 ], 401);
-            }
-
-            // Validar que SOLO safekidsandrea@gmail.com pueda crear admins
-            if ($creatorUser->email !== 'safekidsandrea@gmail.com') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No tienes permisos para registrar administradores.',
-                    'timestamp' => now(),
-                ], 403);
             }
 
             $creatorId = $creatorUser->id;
@@ -303,15 +297,15 @@ class UserController extends Controller
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 if ($errors->has('first_name')) {
-                    $msg = 'El nombre es obligatorio y debe tener máximo 100 caracteres.';
+                    $msg = 'El nombre debe tener máximo 100 caracteres.';
                 } elseif ($errors->has('last_name')) {
-                    $msg = 'El apellido es obligatorio y debe tener máximo 100 caracteres.';
+                    $msg = 'El apellido debe tener máximo 100 caracteres.';
                 } elseif ($errors->has('phone')) {
-                    $msg = 'El teléfono es obligatorio y debe tener máximo 10 dígitos.';
+                    $msg = 'El teléfono debe tener máximo 10 dígitos.';
                 } elseif ($errors->has('email')) {
-                    $msg = 'El correo es obligatorio, debe ser válido y único.';
+                    $msg = 'El correo debe ser válido y único.';
                 } elseif ($errors->has('password')) {
-                    $msg = 'La contraseña es obligatoria y debe tener mínimo 8 caracteres.';
+                    $msg = 'La contraseña debe tener mínimo 8 caracteres.';
                 } else {
                     $msg = 'Datos inválidos.';
                 }

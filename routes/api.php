@@ -7,6 +7,9 @@ use App\Http\Middleware\JWTMiddleware;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\PlatformController;
+use App\Http\Controllers\GameController;
+
+Route::post('registerAdmin', [UserController::class, 'registerAdmin']);   // Crear un admin
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);      // Login con 2FA
@@ -17,16 +20,17 @@ Route::prefix('auth')->group(function () {
     Route::post('UsOp/passResetRequest', [AuthController::class, 'passResetRequest']);
     Route::post('UsOp/validatorCode', [AuthController::class, 'validatorCode']);
     Route::post('UsOp/changePassword', [AuthController::class, 'changePassword']);
+
+    //funciones de juegos
+    Route::get('games', [GameController::class, 'index']); // listar todos
+    Route::get('games/{id}', [GameController::class, 'show']); // detalle de uno
 });
-
-
 
 Route::middleware([JWTMiddleware::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('my-profile', [UserController::class, 'myProfile']);
 
     Route::prefix('users')->group(function () {
-        Route::post('registerAdmin', [UserController::class, 'registerAdmin']);   // Crear un admin
         Route::post('registerVisit', [UserController::class, 'registerVisit']);   // Crear un visitante
         Route::put('update-profile/{id}', [UserController::class, 'updateProfile']);   //Editar su informacion de usuario
         Route::put('sofdelete-Account/{id}', [UserController::class, 'deactivateAccount']);
@@ -54,5 +58,12 @@ Route::middleware([JWTMiddleware::class])->group(function () {
         Route::get('platformShow/{id}', [PlatformController::class, 'show']); // Ver Desarrollador específico
         Route::put('platformUpdate/{id}', [PlatformController::class, 'update']); // Editar Desarrollador 
         Route::delete('platformRemove/{id}', [PlatformController::class, 'destroy']); // Eliminar Desarrollador
+    });
+
+    Route::prefix('games1')->group(function () {
+        Route::post('registerGames', [GameController::class, 'store']); // Agregar juego
+        Route::post('games/platforms/{gameId}', [GameController::class, 'addPlatforms']);
+        Route::put('games/{id}', [GameController::class, 'update']); //Editar juego
+        Route::put('games/deactivate/{id}', [GameController::class, 'deactivate']); //desactivar juego
     });
 });

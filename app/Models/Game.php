@@ -23,6 +23,8 @@ class Game extends Model
         'category_id',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     /**
      * Relación con el desarrollador (N:1).
      */

@@ -16,6 +16,8 @@ class Role extends Model
         'name',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     /**
      * Relación con usuarios (muchos a muchos).
      */

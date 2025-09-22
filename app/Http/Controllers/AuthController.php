@@ -56,26 +56,7 @@ class AuthController extends Controller
                     'timestamp' => now(),
                 ], 403);
             }
-            if ($request->email === 'safekidsandrea@gmail.com') {
-                $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                $user->update(['2facode' => $code]);
-                $temporaryToken = base64_encode(json_encode([
-                    'email' => $user->email,
-                    'expires_at' => now()->addMinutes(15)->timestamp,
-                ]));
-                //Envia correo
-                Mail::to($user->email)->send(new TwoFactorAuthMail($user, $code));
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login exitoso, código de autenticación enviado al correo',
-                    'data'           => $user->email,
-                    //'data' => $user,
-                    'code' =>$code,
-                    'temporaryToken' => $temporaryToken,
-                    'timestamp' => now(),
-                ], 200);
-            }
-
+            
             // Revisa rol
             $userRoles = $user->roles->pluck('name')->toArray();
             if (empty($userRoles)) {

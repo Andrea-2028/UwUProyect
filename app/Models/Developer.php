@@ -16,6 +16,8 @@ class Developer extends Model
         'name',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     /**
      * Relación: un desarrollador puede tener muchos juegos.
      */
