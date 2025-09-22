@@ -10,6 +10,7 @@ use App\Http\Controllers\PlatformController;
 use App\Http\Controllers\GameController;
 
 Route::post('registerAdmin', [UserController::class, 'registerAdmin']);   // Crear un admin
+Route::post('registerVisit', [UserController::class, 'registerVisit']);   // Crear un visitante
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);      // Login con 2FA
@@ -31,7 +32,6 @@ Route::middleware([JWTMiddleware::class])->group(function () {
     Route::get('my-profile', [UserController::class, 'myProfile']);
 
     Route::prefix('users')->group(function () {
-        Route::post('registerVisit', [UserController::class, 'registerVisit']);   // Crear un visitante
         Route::put('update-profile/{id}', [UserController::class, 'updateProfile']);   //Editar su informacion de usuario
         Route::put('sofdelete-Account/{id}', [UserController::class, 'deactivateAccount']);
     });
