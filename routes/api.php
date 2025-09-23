@@ -9,10 +9,12 @@ use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\PlatformController;
 use App\Http\Controllers\GameController;
 
-Route::post('registerAdmin', [UserController::class, 'registerAdmin']);   // Crear un admin
-Route::post('registerVisit', [UserController::class, 'registerVisit']);   // Crear un visitante
 
 Route::prefix('auth')->group(function () {
+    //registros
+    Route::post('registerAdmin', [UserController::class, 'registerAdmin']);   // Crear un admin
+    Route::post('registerVisit', [UserController::class, 'registerVisit']);   // Crear un visitante
+
     Route::post('login', [AuthController::class, 'login']);      // Login con 2FA
     Route::post('verify-2fa', [AuthController::class, 'verify2fa']); // Verificar código
     Route::post('users/refresh-token', [AuthController::class, 'refreshToken']);
