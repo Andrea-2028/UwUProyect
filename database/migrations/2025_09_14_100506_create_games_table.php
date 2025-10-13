@@ -19,8 +19,10 @@ return new class extends Migration
             $table->date('release_date')->nullable();
             $table->enum('status', ['active','inactive'])->default('active');
             $table->string('image')->nullable();
-            $table->foreignId('developer_id')->constrained('developers')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->unsignedBigInteger('developer_id')->nullable();
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->foreign('developer_id')->references('id')->on('developers')->nullOnDelete();
+            $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete();
             $table->timestamps();
         });
     }

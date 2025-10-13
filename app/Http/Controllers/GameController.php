@@ -180,9 +180,9 @@ class GameController extends Controller
         }
     }
      
-    //Aunn esta en fase de prubeas mamahuevo
+    //Aun esta en fase de prubeas
     public function update(Request $request, $id)
-    {
+    {   
         try {
              // Obtener usuario del token
             $user = JWTAuth::parseToken()->authenticate();
@@ -213,7 +213,7 @@ class GameController extends Controller
                     'timestamp' => now(),
                 ], 404);
             }
-
+            //dd($request);
             // Validaciones
             $validator = \Validator::make($request->all(), [
                 'title' => 'nullable|string|max:100|unique:games,title,' . $game->id,
@@ -244,7 +244,7 @@ class GameController extends Controller
                 }  elseif ($errors->has('category_id')) {
                     $msg = 'La categoria debe de existir en la base de datos';
                 }  elseif ($errors->has('platform_ids')) {
-                    $msg = 'Una plataforma como min y debe de existir en la base de datos';
+                    $msg = 'Debe de existir en la base de datos';
                 } else {
                     $msg = 'Datos inválidos.';
                 }
@@ -257,26 +257,28 @@ class GameController extends Controller
             }
 
             // Obtener solo campos con valor real
-            $dataToUpdate = collect($validator->validated())
+            $validated = $validator->validated();
+
+            $dataToUpdate = collect($validated)
                 ->except(['platform_ids'])
                 ->filter(fn($v) => $v !== null && $v !== '')
                 ->toArray();
 
-            if (empty($dataToUpdate)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Debes enviar al menos un campo para actualizar.',
-                ], 400);
-            }
-
             // Procesar imagen si viene
             if ($request->hasFile('image')) {
-                // Borrar la imagen anterior si existe
                 if ($game->image && \Storage::exists('public/' . $game->image)) {
                     \Storage::delete('public/' . $game->image);
                 }
                 $path = $request->file('image')->store('games', 'public');
                 $dataToUpdate['image'] = $path;
+            }
+
+            // validar después de procesar la imagen
+            if (empty($dataToUpdate) && empty($validated['platform_ids'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes enviar al menos un campo o imagen para actualizar.',
+                ], 400);
             }
 
             // --- Manejo de plataformas ---

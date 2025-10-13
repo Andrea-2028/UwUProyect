@@ -64,8 +64,7 @@ Route::middleware([JWTMiddleware::class])->group(function () {
 
     Route::prefix('games1')->group(function () {
         Route::post('registerGames', [GameController::class, 'store']); // Agregar juego
-        Route::post('games/platforms/{gameId}', [GameController::class, 'addPlatforms']);
-        Route::put('games/{id}', [GameController::class, 'update']); //Editar juego
+        Route::post('games/{id}', [GameController::class, 'update']); //Editar juego
         Route::put('games/deactivate/{id}', [GameController::class, 'deactivate']); //desactivar juego
     });
 });

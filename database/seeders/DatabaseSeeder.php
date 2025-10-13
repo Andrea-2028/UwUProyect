@@ -17,15 +17,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        //crear roles
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $visitorRole = Role::firstOrCreate(['name' => 'visitor']);
-        
+        //crear user
         $user = User::create([    
             'first_name' => 'Andrea',    
             'last_name'  => 'GuelDesarrollador',    
             'phone'      => '1234567890',    
             'email'      => 'safekidsandrea@gmail.com',    
-            'password'   => Hash::make('G615243m20?'),  
+            'password'   => Hash::make('goku123?'),  
             'status'     => 'active',]);
+
+        // Asignar rol admin al usuario
+        $user->roles()->attach($adminRole->id);
     }
 }

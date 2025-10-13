@@ -240,6 +240,10 @@ class CategoryController extends Controller
                 ], 404);
             }
 
+            // Poner en 0 los juegos relacionados antes de eliminar la categoría
+            \App\Models\Game::where('category_id', $category->id)
+            ->update(['category_id' => null]);
+
             // Eliminar categoría
             $category->delete();
 

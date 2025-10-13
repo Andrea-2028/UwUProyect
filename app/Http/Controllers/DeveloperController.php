@@ -240,6 +240,10 @@ class DeveloperController extends Controller
                 ], 404);
             }
 
+            // Poner en 0 los juegos relacionados antes de eliminar la categoría
+            \App\Models\Game::where('developer_id', $developer->id)
+            ->update(['developer_id' => null]);
+
             // Eliminar Desarrollador
             $developer->delete();
 
