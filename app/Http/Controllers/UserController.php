@@ -209,18 +209,7 @@ class UserController extends Controller
 
             // Obtener roles del usuario
             $roles = $user->roles;
-
             if ($roles->isEmpty()) {
-                // Caso especial: nosotros
-                if (strpos($user->email, 'safekidsandrea@gmail.com') !== false) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Perfil del usuario obtenido exitosamente (sin rol asignado) porque somos nosotos da',
-                        'data' => $user->makeHidden(['password', '2facode', 'created_at']),
-                        'timestamp' => now(),
-                    ], 200);
-                }
-
                 // Cualquier otro usuario sin rol sí se bloquea
                 return response()->json([
                     'success' => false,
