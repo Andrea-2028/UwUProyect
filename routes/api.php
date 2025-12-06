@@ -67,4 +67,11 @@ Route::middleware([JWTMiddleware::class])->group(function () {
         Route::post('games/{id}', [GameController::class, 'update']); //Editar juego
         Route::put('games/deactivate/{id}', [GameController::class, 'deactivate']); //desactivar juego
     });
+
+    Route::middleware('favorites')->group(function () {
+    Route::post('/add', [FavoriteGameController::class, 'addFavorite']);
+    Route::post('/remove', [FavoriteGameController::class, 'removeFavorite']);
+    Route::get('/list', [FavoriteGameController::class, 'listFavorites']);
+    });
+
 });

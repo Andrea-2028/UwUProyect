@@ -85,4 +85,11 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+
+    //relacion con favoritos
+    public function favoriteGames()
+    {
+        return $this->hasMany(FavoriteGame::class);
+    }
+
 }

@@ -67,4 +67,11 @@ class Game extends Model
     {
         return $this->hasMany(Notification::class, 'game_id');
     }
+
+    //Relacion con favoritos
+    public function favorites()
+    {
+        return $this->hasMany(FavoriteGame::class);
+    }
+
 }
