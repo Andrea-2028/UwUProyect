@@ -32,7 +32,7 @@ class UserController extends Controller
                 'phone'      => 'nullable|digits:10',
                 'email'      => 'required|string|email|max:100|unique:users,email',
                 'password'   => 'required|string|min:8',
-            ]);
+            ]); 
 
             if ($validator->fails()) {
                 $errors = $validator->errors();
@@ -390,8 +390,197 @@ class UserController extends Controller
         }
     }
 
+    public function listVisitors()
+    {
+        try {
+            // Autenticar usuario desde el token
+            $user = JWTAuth::parseToken()->authenticate();
 
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado en el token',
+                    'timestamp' => now(),
+                ], 401);
+            }
 
+            // Verificar que tenga rol admin
+            if (!$user->roles->contains('name', 'admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para ver este listado',
+                    'timestamp' => now(),
+                ], 403);
+            }
+
+            // Buscar rol visitante
+            $visitorRole = Role::where('name', 'visitor')->first();
+
+            if (!$visitorRole) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El rol visitor no existe en la base de datos',
+                    'timestamp' => now(),
+                ], 404);
+            }
+
+            // Obtener usuarios con ese rol
+            $visitors = User::whereHas('roles', function ($q) use ($visitorRole) {
+                $q->where('roles.id', $visitorRole->id);
+            })
+            ->get()
+            ->makeHidden(['password', '2facode', 'created_at', 'updated_at', 'email_verified_at']);
+
+            return response()->json([
+                'success'   => true,
+                'message'   => 'Listado de usuarios visitantes obtenido correctamente',
+                'data'      => $visitors,
+                'timestamp' => now(),
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server failed: ' . $e->getMessage(),
+                'timestamp' => now(),
+            ], 500);
+        }
+    }
+
+    public function deactivateVisitor(Request $request, $id)
+    {
+        try {
+            // Usuario autenticado desde token
+            $adminUser = JWTAuth::parseToken()->authenticate();
+
+            if (!$adminUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado en el token',
+                    'timestamp' => now(),
+                ], 401);
+            }
+
+            // Verificar que el usuario sea admin
+            if (!$adminUser->roles->contains('name', 'admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para realizar esta acción',
+                    'timestamp' => now(),
+                ], 403);
+            }
+
+            // Buscar usuario por ID
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado',
+                    'timestamp' => now(),
+                ], 404);
+            }
+
+            // Verificar que sea visitante
+            if (!$user->roles->contains('name', 'visitor')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El usuario no pertenece al rol visitante',
+                    'timestamp' => now(),
+                ], 400);
+            }
+
+            // Cambiar estatus a inactivo
+            $user->status = 'inactive';
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Visitante desactivado correctamente.',
+                'data' => $user->makeHidden(['password', '2facode']),
+                'timestamp' => now(),
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al desactivar el visitante: ' . $e->getMessage(),
+                'timestamp' => now(),
+            ], 500);
+        }
+    }
+
+    public function activateVisitor(Request $request, $id)
+    {
+        try {
+            // Usuario autenticado desde token
+            $adminUser = JWTAuth::parseToken()->authenticate();
+
+            if (!$adminUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado en el token',
+                    'timestamp' => now(),
+                ], 401);
+            }
+
+            // Verificar que el usuario sea admin
+            if (!$adminUser->roles->contains('name', 'admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para realizar esta acción',
+                    'timestamp' => now(),
+                ], 403);
+            }
+
+            // Buscar usuario por ID
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado',
+                    'timestamp' => now(),
+                ], 404);
+            }
+
+            // Verificar que sea visitante
+            if (!$user->roles->contains('name', 'visitor')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El usuario no pertenece al rol visitante',
+                    'timestamp' => now(),
+                ], 400);
+            }
+
+            // Verificar que esté inactivo
+            if ($user->status !== 'inactive') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La cuenta ya está activa',
+                    'timestamp' => now(),
+                ], 400);
+            }
+
+            // Activar cuenta
+            $user->status = 'active';
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Visitante activado correctamente.',
+                'data' => $user->makeHidden(['password', '2facode']),
+                'timestamp' => now(),
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al activar el visitante: ' . $e->getMessage(),
+                'timestamp' => now(),
+            ], 500);
+        }
+    }
 
 
 

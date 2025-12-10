@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\PlatformController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\FavoriteGameController;
+
 
 
 Route::prefix('auth')->group(function () {
@@ -32,6 +34,12 @@ Route::prefix('auth')->group(function () {
 Route::middleware([JWTMiddleware::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('my-profile', [UserController::class, 'myProfile']);
+
+    Route::prefix('admins')->group(function () {
+        Route::get('visitors', [UserController::class, 'listVisitors']);
+        Route::put('visitors/deactivate/{id}', [UserController::class, 'deactivateVisitor']);
+        Route::put('/visitors/activat/{id}', [UserController::class, 'activateVisitor']);
+    });
 
     Route::prefix('users')->group(function () {
         Route::put('update-profile/{id}', [UserController::class, 'updateProfile']);   //Editar su informacion de usuario
@@ -68,10 +76,10 @@ Route::middleware([JWTMiddleware::class])->group(function () {
         Route::put('games/deactivate/{id}', [GameController::class, 'deactivate']); //desactivar juego
     });
 
-    Route::middleware('favorites')->group(function () {
-    Route::post('/add', [FavoriteGameController::class, 'addFavorite']);
-    Route::post('/remove', [FavoriteGameController::class, 'removeFavorite']);
-    Route::get('/list', [FavoriteGameController::class, 'listFavorites']);
+    Route::prefix('favorites')->group(function () {
+    Route::get('list', [FavoriteGameController::class, 'listFavorites']);
+    Route::get('find/{id}', [FavoriteGameController::class, 'findFavoriteById']);
+    Route::post('accionFavotites/{id}', [FavoriteGameController::class, 'toggleFavorite']);
     });
 
 });
