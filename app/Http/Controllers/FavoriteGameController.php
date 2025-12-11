@@ -27,7 +27,8 @@ class FavoriteGameController extends Controller
                     'timestamp' => now(),
                 ], 401);
             }
-            // Verificar rol admin
+
+            // Verificar rol visitor
             $roles = $user->roles()->pluck('name')->toArray();
             if (!in_array('visitor', $roles)) {
                 return response()->json([
@@ -37,8 +38,9 @@ class FavoriteGameController extends Controller
                 ], 403);
             }
 
-            // Cargar juegos completos 
+            // 🔥 Cargar SOLO favoritos activos
             $favorites = FavoriteGame::where('user_id', $user->id)
+                ->where('status', 'active')   // 👈 AQUÍ EL CAMBIO IMPORTANTE
                 ->with([
                     'game.developer',
                     'game.category',
@@ -46,7 +48,7 @@ class FavoriteGameController extends Controller
                 ])
                 ->get();
 
-            // Agregar image_url a cada juego
+            // Agregar image_url
             foreach ($favorites as $fav) {
                 if ($fav->game) {
                     $fav->game->image_url = $fav->game->image
@@ -56,11 +58,11 @@ class FavoriteGameController extends Controller
             }
 
             return response()->json([
-            'success' => true,
-            'message' => 'Juegos favoritos obtenidos correctamente',
-            'data'    => $favorites,
-            'timestamp' => now(),
-        ], 200);
+                'success' => true,
+                'message' => 'Juegos favoritos obtenidos correctamente',
+                'data'    => $favorites,
+                'timestamp' => now(),
+            ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -70,6 +72,7 @@ class FavoriteGameController extends Controller
             ], 500);
         }
     }
+
 
     public function findFavoriteById(Request $request, $id)
     {
